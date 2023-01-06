@@ -1,0 +1,194 @@
+## Official Values for reference https://github.com/elastic/helm-charts/blob/7.17/logstash/values.yaml
+
+---
+replicas: 1
+
+logstashConfig:
+  logstash.yml: |
+    http.host: "0.0.0.0"
+    xpack.monitoring.elasticsearch.hosts: "http://localhost:9200"
+    xpack.monitoring.elasticsearch.username: "${ELASTIC_USERNAME}"
+    xpack.monitoring.elasticsearch.password: "${ELASTIC_PASSWORD}"
+    xpack.monitoring.enabled: true
+
+logstashPipeline:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+        ssl => false
+      }  
+    }
+    output { 
+      elasticsearch { 
+        hosts => ["http://localhost:9200"] 
+        sniffing => true
+        manage_template => false
+        document_type => "%{[@metadata][type]}"
+        user => ["${ELASTIC_USERNAME}"] 
+        password => ["${ELASTIC_PASSWORD}"] 
+        ecs_compatibility => disabled
+        index => "%{type}-%{+YYYY.MM.dd}" 
+      } 
+    }
+
+logstashPatternDir: "/usr/share/logstash/patterns/"
+logstashPattern: {}
+
+extraEnvs:
+  - name: ELASTIC_USERNAME
+    value: ${ELASTICSEARCH_USERNAME}
+  - name: ELASTIC_PASSWORD
+    value: ${ELASTICSEARCH_PASSWORD}
+
+envFrom: []
+
+secrets: []
+
+secretMounts: []
+
+hostAliases: []
+
+image: "docker.elastic.co/logstash/logstash"
+imageTag: "7.17.3"
+imagePullPolicy: "IfNotPresent"
+imagePullSecrets: []
+
+podAnnotations: {}
+
+# additionals labels
+labels: {}
+
+logstashJavaOpts: "-Xmx1g -Xms1g"
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "1Gi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+
+rbac:
+  create: false
+  serviceAccountAnnotations: {}
+  serviceAccountName: ""
+  annotations:
+    {}
+    #annotation1: "value1"
+  #annotation2: "value2"
+  #annotation3: "value3"
+
+podSecurityPolicy:
+  create: false
+  name: ""
+  spec:
+    privileged: false
+    fsGroup:
+      rule: RunAsAny
+    runAsUser:
+      rule: RunAsAny
+    seLinux:
+      rule: RunAsAny
+    supplementalGroups:
+      rule: RunAsAny
+    volumes:
+      - secret
+      - configMap
+      - persistentVolumeClaim
+
+persistence:
+  enabled: false
+  annotations: {}
+
+extraVolumes: []
+
+extraVolumeMounts: []
+
+extraContainers: []
+
+extraInitContainers: []
+
+priorityClassName: ""
+
+antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+antiAffinity: "hard"
+
+nodeAffinity: {}
+
+podAffinity: {}
+
+podManagementPolicy: "Parallel"
+
+httpPort: 9600
+
+extraPorts: []
+
+updateStrategy: RollingUpdate
+
+maxUnavailable: 1
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  # readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+terminationGracePeriod: 120
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 300
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 3
+
+schedulerName: ""
+
+nodeSelector: {}
+tolerations: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+lifecycle: {}
+
+service:
+  annotations: { }
+  type: ClusterIP
+  loadBalancerIP: ""
+  ports:
+    - name: beats
+      port: 5044
+      protocol: TCP
+      targetPort: 5044
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
