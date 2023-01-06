@@ -1,7 +1,7 @@
 ## Official Values for reference https://github.com/elastic/helm-charts/blob/7.17/kibana/values.yaml
 
 ---
-elasticsearchHosts: "http://10.108.212.91:9200"
+elasticsearchHosts: "http://localhost:9200"
 
 replicas: 1
 
