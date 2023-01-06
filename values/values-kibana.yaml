@@ -1,0 +1,108 @@
+## Official Values for reference https://github.com/elastic/helm-charts/blob/7.17/kibana/values.yaml
+
+---
+elasticsearchHosts: "http://10.108.212.91:9200"
+
+replicas: 1
+
+extraEnvs:
+  - name: ELASTIC_USERNAME
+    value: ${ELASTICSEARCH_USERNAME}
+  - name: ELASTIC_PASSWORD
+    value: ${ELASTICSEARCH_PASSWORD}
+
+envFrom: []
+
+secretMounts: []
+
+hostAliases: []
+
+image: "docker.elastic.co/kibana/kibana"
+imageTag: "7.17.3"
+imagePullPolicy: "IfNotPresent"
+
+# additionals labels
+labels: {}
+
+annotations: {}
+
+podAnnotations: {}
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "1Gi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+protocol: http
+
+serverHost: "0.0.0.0"
+
+healthCheckPath: "/app/kibana"
+
+kibanaConfig:
+  kibana.yml: |
+    elasticsearch.username: "${ELASTIC_USERNAME}"
+    elasticsearch.password: "${ELASTIC_PASSWORD}"
+    elasticsearch.ssl.verificationMode: "none"
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  # readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+serviceAccount: ""
+
+automountToken: true
+
+priorityClassName: ""
+
+httpPort: 5601
+
+extraVolumes: []
+
+extraVolumeMounts: []
+
+extraContainers: []
+
+extraInitContainers: []
+
+updateStrategy:
+  type: "Recreate"
+
+service:
+  type: ClusterIP
+  loadBalancerIP: ""
+  port: 5601
+  nodePort: ""
+  labels: {}
+  annotations: {}
+  loadBalancerSourceRanges: []
+  # 0.0.0.0/0
+  httpPortName: http
+
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 3
+  timeoutSeconds: 5
+
+imagePullSecrets: []
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+nameOverride: ""
+fullnameOverride: ""
+
+lifecycle: {}
+elasticsearchURL: "" # "http://elasticsearch-master:9200"
